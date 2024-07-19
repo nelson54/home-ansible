@@ -1,0 +1,47 @@
+- name: Setup Packages
+  hosts: cluster
+  become: true
+  tasks:
+  - name: verify metricbeat is on the latest version
+    ansible.builtin.apt:
+      name: "metricbeat"
+      state: latest
+
+  - name: Create a directory if it does not exist
+    ansible.builtin.file:
+      path: "{{ item }}"
+      state: directory
+      mode: '0744'
+      owner: root
+      group: root
+    loop:
+      - /var/log/metricbeat
+      - /usr/share/metricbeat
+      - /usr/share/metricbeat/logs
+
+  - name: copy config file
+    ansible.builtin.template:
+      src: ./configs/metricbeat.yml.j2
+      dest: /etc/metricbeat/metricbeat.yml
+
+  - name: fix permissions of config file
+    ansible.builtin.file:
+      path: /etc/metricbeat/metricbeat.yml
+      owner: root
+      group: root
+      mode: '0644'
+
+  - name: reload systemd services
+    ansible.builtin.systemd_service:
+      daemon_reload: true
+
+  - name: Make sure a service unit is running
+    ansible.builtin.systemd_service:
+      state: restarted
+      enabled: true
+      name: metricbeat
+
+  - ansible.builtin.command:
+      cmd: metricbeat setup --dashboards
+
+

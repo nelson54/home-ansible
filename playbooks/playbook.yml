@@ -1,0 +1,11 @@
+
+- ansible.builtin.import_playbook: ./setup.yml
+- ansible.builtin.import_playbook: ./hashicorp/add_apt_repo.yml
+- ansible.builtin.import_playbook: ./hashicorp/install_vault.yml
+- ansible.builtin.import_playbook: ./hashicorp/install_consul.yml
+- ansible.builtin.import_playbook: ./hashicorp/install_nomad.yml
+- ansible.builtin.import_playbook: ./elastic/add_apt_repo.yml
+- ansible.builtin.import_playbook: ./elastic/install_apm.yml
+- ansible.builtin.import_playbook: ./elastic/install_elasticsearch.yml
+- ansible.builtin.import_playbook: ./elastic/install_kibana.yml
+- ansible.builtin.import_playbook: ./elastic/install_metricbeat.yml

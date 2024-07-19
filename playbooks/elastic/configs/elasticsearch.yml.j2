@@ -1,0 +1,10 @@
+# ---------------------------------- Network -----------------------------------
+#
+# Set the bind address to a specific IP (IPv4 or IPv6):
+#
+network.host: "{{ ansible_facts.default_ipv4.address }}"
+discovery.seed_hosts: "{{ ansible_facts.default_ipv4.address }}"
+
+xpack.security.enabled: false
+xpack.security.transport.ssl.enabled: false
+xpack.security.enrollment.enabled: false

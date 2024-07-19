@@ -1,0 +1,50 @@
+- name: Setup Packages
+  hosts: apm_instances
+  become: true
+  tasks:
+  - name: verify apm-server is on the latest version
+    ansible.builtin.apt:
+      name: "apm-server"
+      state: latest
+
+  - name: Create a directory if it does not exist
+    ansible.builtin.file:
+      path: "{{ item }}"
+      state: directory
+      mode: '0744'
+      owner: apm-server
+      group: apm-server
+    loop:
+      - /var/log/apm-server
+      - /usr/share/apm-server
+      - /usr/share/apm-server/logs
+
+  - name: copy config file
+    ansible.builtin.template:
+      src: ./configs/apm-server.yml.j2
+      dest: /etc/apm-server/apm-server.yml
+
+  - name: fix permissions of config file
+    ansible.builtin.file:
+      path: /etc/apm-server/apm-server.yml
+      owner: apm-server
+      group: apm-server
+      mode: '0644'
+
+  - name: reload systemd services
+    ansible.builtin.systemd_service:
+      daemon_reload: true
+
+  - name: Make sure a service unit is running
+    ansible.builtin.systemd_service:
+      state: stopped
+      enabled: false
+      name: apm-server
+
+  - name: Allow udp ports for apm-server
+    community.general.ufw:
+      rule: allow
+      port: '8300'
+      proto: tcp
+      state: reloaded
+

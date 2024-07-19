@@ -1,0 +1,44 @@
+---
+- name: Add the user 'ansible'
+  hosts: cluster
+  become: true
+  tasks:
+  - name: "Ensure wheel group exists"
+    ansible.builtin.group:
+      name: wheel
+      state: present
+  - name: "Ensure wheel group exists"
+    ansible.builtin.group:
+      name: ansible
+      state: present
+  - name: Allow 'wheel' group to have passwordless sudo
+    lineinfile:
+      dest: /etc/sudoers
+      state: present
+      regexp: '^%wheel'
+      line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+      validate: 'visudo -cf %s'
+  - name: "Add ansible user"
+    ansible.builtin.user:
+      name: ansible
+      password: ansible
+      comment: Ansible user
+      uid: 1002
+      groups: "ansible,wheel"
+- name: Setup Packages
+  hosts: cluster
+  become: true
+  tasks:
+    - name: Update repositories cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Update all packages to their latest version
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
+    - name: Get latest firmware upgrades
+      ansible.builtin.command:
+        cmd: fwupdmgr get-upgrades
+
+
